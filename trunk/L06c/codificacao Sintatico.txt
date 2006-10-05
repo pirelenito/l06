@@ -1,0 +1,775 @@
+LeioToken ( );
+programa ( );
+
+programa ( )
+{
+	if ( token != "PROG" )
+		return false;
+
+	LeioToken ( );
+	indentificador ( );
+
+	LeioToken ( );
+	bloco ( );
+
+	LeioToken ( );
+	if ( token != '.' )
+		return false;
+
+	return true;
+}
+
+identificador ( )
+{
+	if ( token != ID )
+		return false;
+
+	return true;
+}
+
+numero ( )
+{
+	if ( token != INT )
+		return false;
+
+	return true;
+}
+
+bloco ( )
+{	
+	LeioToken ( );
+	declaracoes ( );
+
+	LeioToken ( );
+	Comando_composto ( );
+}
+
+declaracoes ( )
+{
+	if ( token == TARGET )
+	{
+		LeioToken ( );
+		parte_rotulos ( );		
+	}
+	
+	if ( token == CONST )
+	{
+		LeioToken ( );
+		parte_const ( );		
+	}
+
+	if ( token == TYPEDEF )
+	{
+		LeioToken ( );
+		parte_tipos ( );
+	}
+
+	if ( token == ID )
+	{
+		LeioToken ( );
+		parte_vars ( );
+	}
+
+	if ( token == PROC )
+	{
+		LeioToken ( );
+		parte_rotinas ( );
+	}
+}
+
+parte_rotulos ( )
+{	
+	do 
+	{
+		LeioToken ( );
+		numero ( );
+
+		LeioToken ( );
+	} 
+	while ( token == ',' );
+	
+	if ( token != ';' )
+		return false;
+
+	return true;
+}
+
+parte_const ( )
+{
+	if ( token != ID )
+		return false;
+	
+	while ( token == ID )
+	{
+		//não chamo letoken antes pois dentro desta func vou usar o ID
+		decl_cte ( );	
+	
+		LeioToken ( );
+		if ( token != ';' )
+			return false;
+
+		LeioToken ( );
+	}	 
+
+	return true;
+}
+
+decl_cte ( )
+{
+	if ( token != ID )
+		return false;
+	
+	LeioToken ( );
+	if ( token != IS )
+		return false;
+
+	LeioToken ( )
+	expressao ( );
+
+	return true;
+}
+
+parte_tipos ( )
+{
+	if ( token != TYPEDEF )
+		return false;
+
+	LeioToken ( );
+	if ( token != ID )
+		return false;
+	
+	while ( token == ID )
+	{
+		//não chamo letoken antes pois dentro desta func vou usar o ID
+		definicao_tipo ( );	
+	
+		LeioToken ( );
+		if ( token != ';' )
+			return false;
+
+		LeioToken ( );
+	}	 
+
+	return true;
+}
+
+definicao_tipos ( )
+{
+	if ( token != ID )
+		return false;
+	
+	LeioToken ( );
+	if ( token != '=' )
+		return false;
+
+	LeioToken ( )
+	tipo ( );
+
+	return true;
+}
+
+tipo ( )
+{
+	if ( token == ID )
+		identificador ( );
+
+	else if ( token == ARRAY )
+		tipo_array ( );
+
+	else if ( token == RECORD )
+		tipo_registro ( );
+
+	return true;
+}
+
+tipo_array ( )
+{
+	if ( token != ARRAY )
+		return false;
+
+	LeioToken ( );
+	if ( token != '(' )
+		return false;
+
+	LeioToken ( );
+	tipo ( );
+
+	LeioToken ( )
+	if ( token != ')' )
+		return false;
+
+	LeioToken ( )
+	if ( token != '[' )
+		return false;
+
+	do
+	{		
+		LeioToken ( );
+		indice ( );
+	
+		LeioToken ( );
+	}
+	while ( token == ',' );
+
+	if ( token != ']' )
+		return false;
+
+	return true;
+}
+
+inicice ( )
+{
+	numero ( );	
+
+	LeioToken ( );
+	if ( token != '..' )
+		return false;
+
+	LeioToken ( );
+	numero ( );	
+
+	return true;
+}
+
+tipo_registro ( )
+{
+	if ( token != RECORD )
+		return false;
+
+	LeioToken ( );
+	lst_campos ( );
+
+	LeioToken ( )
+	if ( token != END )
+		return false;
+
+	LeioToken ( )
+	if ( token != RECORD )
+		return false;
+}
+
+
+lst_campo ( )
+{
+	campo ( );
+
+	LeioToken ( )
+	while ( token == ';' )
+	{
+		LeioToken ( );
+
+		campo ( );
+
+		LeioToken ( );
+	}
+}
+
+campo ( )
+{	
+	lst_identificadores ( );
+	
+	LeioToken ( );	
+	if ( token != ":" )
+		return false;
+
+	LeioToken ( );
+	tipo ( );	
+}
+
+lst_identificadores ( )
+{	
+	identificador ( );
+
+	LeioToken ( )
+	while ( token == ',' )
+	{
+		LeioToken ( );
+
+		identificador ( );
+
+		LeioToken ( );
+	}
+}
+
+parte_vars ( )
+{
+	if ( token != VARS )
+		return false;
+
+	LeioToken ( )
+	do 
+	{		
+		decl_vars ( );
+		
+		LeioToken ( );
+		if ( token != ';' )
+			return false;
+
+		LeioToken ( );
+
+	} while ( token != ID )
+
+	if ( token != ';' )
+		return false
+}
+
+decl_vars ( )
+{
+	lst_identificadores ( );
+	
+	LeioToken ( );
+	if ( token != ':' )
+		return false;
+
+	LeioToken ( );
+	tipo ( );	
+}
+
+parte_rotinas ( )
+{
+	while ( token == PROC || token == FUNC )
+	{
+		if ( token == PROC )
+			declaracao_procedimento ( );
+		else 
+			declaracao_funcao ( );
+	}
+
+}
+
+declaracao_procedimento ( )
+{
+	if ( token != PROC )
+		return false;
+
+	LeioToken ( );
+	identificador ( );
+
+	LeioToken ( );
+	if ( token == '(' ) 
+		parametros_formais ( );
+
+	if ( token != IS )
+		return false;
+	
+	LeioToken ( );
+	bloco ( );
+
+	LeioToken ( );
+	if ( token != ';' )
+		return false;
+}
+
+declaracao_funcao ( )
+{
+	if ( token != FUNC )
+		return false;
+
+	LeioToken ( );
+	if ( token != '[' )
+		return false;
+
+	LeioToken ( );
+	identificador ( );
+
+	LeioToken ( );
+	if ( token != ']' )
+		return false;
+
+	LeioToken ( );
+	identificador ( );
+
+	LeioToken ( );
+	if ( token == '(' ) 
+		parametros_formais ( );
+
+	if ( token != IS )
+		return false;
+	
+	LeioToken ( );
+	bloco ( );
+
+	LeioToken ( );
+	if ( token != ';' )
+		return false;
+}
+
+parametros_formais ( )
+{
+	if ( token != '(' )
+		return false;
+
+	do 
+	{
+		LeioToken ( );
+		par_formal ( );
+
+		LeioToken ( );
+	}
+	while ( token == ';' ) 
+
+	if ( token != ')' )
+		return false;
+}
+
+par_formal ( )
+{
+	lst_identificadores_par ( );
+
+	LeioToken ( );
+	if ( token != ':' )
+		return false;
+
+	LeioToken ( );
+	identificador ( );
+}
+
+lst_identificadores_par ( )
+{
+	par ( );
+
+	while ( token == ';' )
+	{
+		LeioToken ( );
+		par ( );
+
+		LeioToken ( );
+	}
+}
+
+par ( ) 
+{
+	if ( token == '!' )
+		LeioToken ( );
+
+	identificador ( );
+}
+
+comando_composto ( )
+{
+	if ( token != BEGIN )
+		return false;
+
+	do 
+	{
+		LeioToken ( )
+		comando ( );
+
+		LeioToken ( )
+	}
+	while ( token == ';' )
+
+	LeioToken ( )
+	if ( token != END )
+		return false;
+}
+
+comando ( )
+{
+	if ( token == INT )
+	{
+		numero ( );
+		
+		LeioToken ( );
+		if ( token != ':' )
+			return false;
+	}
+
+	LeioToken ( );
+	comando_sem_rotulo ( );
+}
+
+comando_sem_rotulo ( )
+{
+	if ( token == ID )
+	{
+		identificador ( );
+
+		LeioToken ( );
+		atributoProcedimento ( );
+	}
+	else if ( token == GOTO )
+		desvio ( );
+
+	else if ( token == BEGIN )
+		comando_composto ( );
+
+	else if ( token == IF )
+		comando_condicional ( );
+
+	else if ( token == FORALL )
+		comando_for ( );
+
+	else if ( token == WHILE )
+		comando_while ( );
+	else
+		return false;
+}
+
+atributoProcedimento ( )
+{
+	if ( token == '[' || token == '.' )
+		atribuicao ( );
+	
+	else if ( token == '(' )
+		chamada_procedimento ( );
+		
+	return true;
+}
+
+atribuicao ( )
+{
+	variavel ( );
+
+	LeioToken ( );
+	if ( token != ':=' )
+		return false;
+
+	expressao ( );
+}
+
+chamada_procedimento ( )
+{
+	if ( token == '(' )
+	{
+		LeioToken ( )
+		lst_expressoes ( );
+
+		LeioToken ( )
+		if ( token != ')' )
+			return false;
+	}
+}
+
+variavel ( )
+{
+	if ( token == '[' )
+	{
+		LeioToken ( );
+		lst_expressoes ( );
+
+		LeioToken ( );
+
+		if ( token != ']' )
+			return false;
+
+	}
+	else if ( token == '.' ) 
+	{
+		LeioToken ( );
+		identificador ( );
+	}
+
+	if ( token == '[' || token == '.' )
+		variavel ( );
+}
+
+desvio ( )
+{
+	if ( token != GOTO )
+		return false;
+
+	LeioToken ( )
+	numero ( );
+}
+
+comando_condicional ( )
+{
+	if ( token != IF )
+		return false;
+
+	LeioToken ( );
+	expressao ( );
+
+	LeioToken ( );
+	if ( token != THEN )
+		return false;
+
+	LeioToken ( );
+	comando_sem_rotulo ( );
+
+	LeioToken ( )
+	if ( token == ELSE )
+	{
+		LeioToken ( );
+		comando_sem_rotulo ( );
+	}
+
+	LeioToken ( );
+	if ( token != FI )
+		return false;
+}
+
+comando_for ( )
+{
+	if ( token != FORALL )
+		return false;
+
+	LeioToken ( );
+	variavel ( );
+	
+	LeioToken ( );
+	if( token != IN )
+		return false;
+
+	LeioToken ( );
+	expressao ( );
+
+	LeioToken ( );
+	if ( token != '..' )
+		return false;
+
+	LeioToken ( );
+	expressao ( );
+
+	LeioToken( );
+	if ( token != DO)
+		return false
+
+	LeioToken ( );
+	comando_sem_rotulo ( );
+
+}
+
+comando_while ( )
+{
+	if ( token != WHILE )
+		return false;
+
+	LeioToken ( );
+	expressao ( );
+
+	LeioToken ( );
+	if ( token != DO )
+		return false;
+
+	LeioToken ( );
+	comando_sem_rotulo ( );
+
+}
+
+1st_expressoes ( )
+{
+	expressao ( );
+	
+	LeioToken ( );
+	while ( token = ',' )
+	{
+		LeioToken ( );
+		expressao ( );
+		LeioToken ( );
+	}
+
+}
+
+expressao ( )
+{
+	expressao_simples ( );
+
+	LeioToken ( );
+	if ( token == '=' || token == '<>' || token == '>' || token == '<' || 
+	     || token == '<=' || token == '>=' )
+	{
+		Relacao ( );
+
+		LeioToken ( );
+		expressao_simples ( );
+	}
+
+}
+
+relacao ( )
+}
+	if ( token == '=' || token == '<>' || token == '>' || token == '<' || 
+	     || token == '<=' || token == '>=' )
+		return true;
+{
+
+expressao_simples ( )
+{
+	if ( token == '+' || token == '-' )
+	{
+		LeioToken ( );
+		termo ( );
+	}
+	else
+		termo ( );
+	
+	LeioToken ( );
+	
+	while ( token = '+' || token = '-' || token == OR )
+	{
+		LeioToken ( );
+		termo ( );
+		LeioToken ( );
+	}
+}
+
+termo ( )
+{
+	fator ( );
+
+	LeioToken ( );
+	while ( token = '*' || token = '/' || token == '%' || token = AND )
+	{
+		LeioToken ( );
+		fator ( );
+		LeioToken ( );
+	}
+}
+
+fator ( )
+{
+	if ( token == ID )
+	{
+		identificador ( );
+		
+		LeioToken ( );
+		variavelfuncao ( );
+	}
+	else if ( token == INT )
+		numero ( );
+
+	else if ( token == '(' )
+	{
+		LeioToken ( );
+		expressao ( );
+
+		LeioToken ( )
+		if ( token !=')' )
+			return false;
+	}
+
+	else if ( token == NOT )
+	{
+		LeioToken ( );
+		fator ( );
+	}
+	
+	return false;
+}
+
+variavelfuncao ( )
+{
+	if ( token == '[' || token == '.' )
+		variavel ( );
+	
+	else if ( token == '(' )
+		chamada_funcao ( );
+		
+	return true;
+}
+
+chamada_funcao ( )
+{
+	if ( token == '(' )
+	{
+		LeioToken ( )
+		lst_expressoes ( );
+
+		LeioToken ( )
+		if ( token != ')' )
+			return false;
+	}
+}
+
