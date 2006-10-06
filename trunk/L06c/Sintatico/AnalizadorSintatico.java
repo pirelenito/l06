@@ -139,7 +139,7 @@ public class AnalizadorSintatico
 	{
 		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "identificador" );
 		
-		validaToken ( "TO_ID" , 0 );
+		validaToken ( "TO_ID", 0 );
 
 		eu.valor = token[1];
 		
@@ -243,7 +243,7 @@ public class AnalizadorSintatico
 		validaToken ( "PA_CONST", 1 );
 		
 		leioToken();
-		validaToken ( "TO_ID", 0 );
+		eu.adicionaFilho( identificador() ); 
 		
 		while ( comparaToken ( "TO_ID", 0 ) )
 		{
@@ -281,7 +281,7 @@ public class AnalizadorSintatico
 		validaToken ( "PA_TYPEDEF", 1 );
 		
 		leioToken ( );
-		validaToken ( "TO_ID", 0 );
+		eu.adicionaFilho( identificador() );
 		
 		while ( comparaToken ( "TO_ID", 0 ) )
 		{
@@ -703,7 +703,7 @@ public class AnalizadorSintatico
 	{
 		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "comando_sem_rotulo_identificador" );
 		
-		validaToken ( "TO_ID", 0 );
+		identificador();
 		
 		leioToken ( );
 		if ( comparaToken ( "OP_ATRIB", 1 ) )
@@ -737,7 +737,7 @@ public class AnalizadorSintatico
 	{
 		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "variavel" );
 		
-		validaToken ( "TO_ID", 0 );
+		identificador();
 		
 		leioToken ( );
 		if ( comparaToken ( "OP_ABR_COLC", 1 ) || comparaToken ( "OP_PTO", 1 ) )
@@ -980,7 +980,7 @@ public class AnalizadorSintatico
 	{
 		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "fator_identificador" );
 
-		validaToken ( "TO_ID", 0 );
+		eu.adicionaFilho( identificador() );
 		
 		leioToken ( );
 		if ( comparaToken ( "OP_ABR_COLC", 1 ) || comparaToken ( "OP_PTO", 1 ) )
