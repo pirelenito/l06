@@ -3,8 +3,8 @@ package Semantico;
 import Sintatico.ArvorePrograma;
 
 public class AnalizadorSemantico {
-
-	private ArvorePrograma noAtual;
+	
+	private Declaracoes declaracoes;
 	
 	private int escopoAtual;
 	
@@ -16,18 +16,18 @@ public class AnalizadorSemantico {
 	
 	public void validaArvore(ArvorePrograma arvorePrograma) throws Exception{		
 	
-		noAtual = arvorePrograma;
-		
-		programa ( );		
+		programa ( arvorePrograma );		
 	}
 		
-	private void programa ( ) throws Exception
+	private void programa ( ArvorePrograma no ) throws Exception
 	{
-		semanticoPrograma ( noAtual );
-		
-		caminhaArvore ( );
-		bloco ( );
+		no = no.filho;
+		declaracoes.declara ( no.valor, no.pai, escopoAtual );
+
+		no = no.irmao;
+		bloco ( no );
 	}
+	
 	/*
 	private void identificador ( ) throws Exception
 	{
@@ -51,60 +51,69 @@ public class AnalizadorSemantico {
 		return eu;
 	}*/
 
-	private void bloco ( ) throws Exception
+	private void bloco ( ArvorePrograma no ) throws Exception
 	{	
 		escopoAtual++;
 		
-		caminhaArvore ( );
-		declaracoes ( );	
+		no = no.filho;
+		declaracoes ( no );	
 			
-		caminhaArvore ( );
-		comando_composto ( );
+		no = no.irmao;
+		comando_composto ( no );
 					
 		escopoAtual--;
 	}
-
-	private void declaracoes ( ) throws Exception
-	{		
-		caminhaArvore ( );
+	
+	private void declaracoes ( ArvorePrograma no ) throws Exception
+	{	
+		no = no.filho;		
 		
-		if ( noAtual.nomeNo == "parte_rotulos" )
-			parte_rotulos ( );
+		if ( no != null && no.nomeNo == "parte_rotulos" )
+		{
+			parte_rotulos ( no );
+			no = no.irmao;
+		}
 		
-		if ( noAtual.nomeNo == "parte_const" )
-			parte_const ( );
+		if ( no != null && no.nomeNo == "parte_const" )
+		{
+			parte_const ( no );
+			no = no.irmao;
+		}
 		
-		if ( noAtual.nomeNo == "parte_tipos" )
-			parte_tipos ( );
+		if ( no != null && no.nomeNo == "parte_tipos" )
+		{
+			parte_tipos ( no );
+			no = no.irmao;
+		}
 		
-		if ( noAtual.nomeNo == "parte_vars" )
-			parte_vars ( );
+		if ( no != null && no.nomeNo == "parte_vars" )
+		{
+			parte_vars ( no );
+			no = no.irmao;
+		}
 		
-		if ( noAtual.nomeNo == "parte_rotinas" )
-			parte_rotinas ( );
+		if ( no != null && no.nomeNo == "parte_rotinas" )
+		{
+			parte_rotinas ( no );
+			no = no.irmao;
+		}
 		
 	}
 
-	private void parte_rotulos ( ) throws Exception
-	{	
-		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "parte_rotulos" );
-		
-		validaToken ( "PA_TARGET", 1 );
-		
-		leioToken ( );
-		eu.adicionaFilho ( numero ( ) );
-		
-		leioToken ( );
-		while ( comparaToken ( "OP_VIRG", 1 ) )
-		{
-			leioToken ( ); 
-			eu.adicionaFilho ( numero ( ) );
-			leioToken ( ); 
-		} 
-		
-		validaToken ( "OP_PTVG", 1 );
 
-		return eu;
+	private void parte_rotulos ( ArvorePrograma no ) throws Exception
+	{	
+		no = no.filho;
+		
+		do
+		{
+			if ( !declaracoes.declara(no.valor, no.pai, escopoAtual) )
+				throw new Exception ( "Dupla declaracao do rotulo" + no.valor );
+			
+			no = no.irmao;
+		}
+		while ( no != null );
+		
 	}
 
 	private void parte_const ( ) throws Exception
@@ -500,74 +509,56 @@ public class AnalizadorSemantico {
 		return eu;
 	}
 
-	private void comando_composto ( ) throws Exception
+	private void comando_composto ( ArvorePrograma no ) throws Exception
 	{
-		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "comando_composto" );
-		
-		validaToken ( "PA_BEGIN", 1 );
-			
+		no = no.filho;
 		do
-		{	
-			leioToken ( );
-			if ( comparaToken ( "PA_END", 1 ) )
-			{
-				validaToken ( "PA_END", 1 );
-				return eu;
-			}
-			
-			eu.adicionaFilho ( comando ( ) );
-					
-			leioToken ( );
-				
-		}while ( validaToken ( "OP_PTVG", 1 ) );
-				
-		return eu;
-	}
-
-	private void comando ( ) throws Exception
-	{
-		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "comando" );
-		
-		if ( comparaToken ( "TO_IN", 0 ) )
 		{
-			eu.adicionaFilho ( numero ( ) );
-			
-			leioToken ( );
-			validaToken ( "OP_2PTO", 1 );
-			
-			leioToken ( );
+			comando ( no );
+			no = no.irmao;
 		}
-
-		eu.adicionaFilho ( comando_sem_rotulo ( ) );
+		while ( no.irmao != null );
 		
-		return eu;
+		
 	}
 
-	private void comando_sem_rotulo ( ) throws Exception
+	private void comando ( ArvorePrograma no ) throws Exception
 	{
-		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "comando_sem_rotulo" );
+		no = no.filho;
 		
-		if ( comparaToken ( "TO_ID", 0 ) )
-			eu.adicionaFilho ( comando_sem_rotulo_identificador ( ) );
+		if ( no.nomeNo == "numero" )
+		{
+			if ( !declaracoes.estaDeclaradoNoEscopo ( no.valor, escopoAtual ) )
+				throw new Exception ( "Nao foi declarado o rotulo" );
+			no = no.irmao;
+		}
+		
+		comando_sem_rotulo( no );
+		
+		
+	}
+
+	private void comando_sem_rotulo ( ArvorePrograma no ) throws Exception
+	{		
+		no = no.filho;
+		
+		if ( no.nomeNo == "comando_sem_rotulo_identificador" )
+			comando_sem_rotulo_identificador ( no );
 					
-		else if ( comparaToken ( "PA_GOTO", 1 ) )
-			eu.adicionaFilho ( desvio ( ) );
+		else if ( no.nomeNo == "desvio" )
+			desvio ( no );
 
-		else if ( comparaToken ( "PA_BEGIN", 1 ) )
-			eu.adicionaFilho ( comando_composto ( ) );
+		else if ( no.nomeNo == "comando_composto" )
+			comando_composto ( no );
 
-		else if ( comparaToken ( "PA_IF", 1 ) )
-			eu.adicionaFilho ( comando_condicional ( ) );
+		else if ( no.nomeNo == "comando_condicional" )
+			comando_condicional ( no );
 
-		else if ( comparaToken ( "PA_FORALL", 1 ) )
-			eu.adicionaFilho ( comando_for ( ) );
+		else if ( no.nomeNo == "comando_for" )
+			comando_for ( no );
 
-		else if ( comparaToken ( "PA_WHILE", 1 ) )
-			eu.adicionaFilho ( comando_while ( ) );
-		else
-			throw geraErro ( "identificador ou GOTO ou BEGIN ou IF ou FORALL ou WHILE", token[1] );
-		
-		return eu;
+		else if ( no.nomeNo == "comando_while" )
+			comando_while ( no );
 	}
 
 	private void  comando_sem_rotulo_identificador ( ) throws Exception
@@ -711,14 +702,13 @@ public class AnalizadorSemantico {
 		return eu;
 	}
 
-	private void comando_while ( ) throws Exception 
-	{
-		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "comando_while" );
+	private void comando_while ( ArvorePrograma no ) throws Exception 
+	{		
+		no = no.filho;
 		
-		validaToken ( "PA_WHILE", 1 );
-
-		leioToken ( );
-		eu.adicionaFilho ( expressao ( ) );
+		expressao ( no );
+		if ( no.tipo != "BOOLEANO" )
+			throw new Exception ("PA"); 
 
 		leioToken ( );
 		validaToken ( "PA_DO", 1 );
