@@ -156,6 +156,21 @@ public class AnalizadorSintatico
 		
 		return eu;
 	}
+	
+
+	private ArvorePrograma operador ( ) throws Exception
+	{
+		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "operador" );
+		
+		if ( !( comparaToken ( "OP_MAIS", 1 ) || comparaToken ( "OP_MENOS", 1 ) || comparaToken ( "PA_OR", 1 ) ||
+			 comparaToken ( "OP_VEZES", 1 ) || comparaToken ( "OP_DIV", 1 ) || comparaToken ( "OP_RESTO", 1 ) || comparaToken ( "PA_AND", 1 ) ) )			
+			
+			geraErro( "operador", eu.valor );
+			
+		eu.valor = token[1];
+		
+		return eu;
+	}
 
 	private ArvorePrograma bloco ( ) throws Exception
 	{	
@@ -911,6 +926,7 @@ public class AnalizadorSintatico
 		
 		if ( comparaToken ( "OP_MAIS", 1 ) || comparaToken ( "OP_MENOS", 1 ) )
 		{
+			eu.adicionaFilho ( operador ( ) );
 			leioToken ( );
 			eu.adicionaFilho ( termo ( ) );
 		}
@@ -921,6 +937,7 @@ public class AnalizadorSintatico
 		
 		while ( comparaToken ( "OP_MAIS", 1 ) || comparaToken ( "OP_MENOS", 1 ) || comparaToken ( "PA_OR", 1 ) )
 		{
+			eu.adicionaFilho ( operador ( ) );
 			leioToken ( );
 			eu.adicionaFilho ( termo ( ) );
 			leioToken ( );
@@ -938,6 +955,7 @@ public class AnalizadorSintatico
 		leioToken ( );
 		while ( comparaToken ( "OP_VEZES", 1 ) || comparaToken ( "OP_DIV", 1 ) || comparaToken ( "OP_RESTO", 1 ) || comparaToken ( "PA_AND", 1 ) )
 		{
+			eu.adicionaFilho ( operador ( ) );
 			leioToken ( );
 			eu.adicionaFilho ( fator ( ) );
 			leioToken ( );
@@ -945,7 +963,7 @@ public class AnalizadorSintatico
 		
 		return eu;
 	}
-
+	
 	private ArvorePrograma fator ( ) throws Exception
 	{
 		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "fator" );
