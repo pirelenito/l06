@@ -5,9 +5,7 @@ import Sintatico.ArvorePrograma;
 public class AnalizadorSemantico {
 	
 	private Declaracoes declaracoes;
-	
-	private int escopoAtual;
-	
+		
 	private void caminhaArvore ( )
 	{
 		
@@ -22,7 +20,7 @@ public class AnalizadorSemantico {
 	private void programa ( ArvorePrograma no ) throws Exception
 	{
 		no = no.filho;
-		declaracoes.declara ( no.valor, no.pai, escopoAtual );
+		declaracoes.declara ( no.valor, no.pai, escopoAtual, new Tipo ( Tipo.TIPO_PROGRAMA ) );
 
 		no = no.irmao;
 		bloco ( no );
@@ -53,7 +51,7 @@ public class AnalizadorSemantico {
 
 	private void bloco ( ArvorePrograma no ) throws Exception
 	{	
-		escopoAtual++;
+		declaracoes.sobeEscopo ( );
 		
 		no = no.filho;
 		declaracoes ( no );	
@@ -61,7 +59,7 @@ public class AnalizadorSemantico {
 		no = no.irmao;
 		comando_composto ( no );
 					
-		escopoAtual--;
+		declaracoes.desceEscopo ( );
 	}
 	
 	private void declaracoes ( ArvorePrograma no ) throws Exception
@@ -107,7 +105,7 @@ public class AnalizadorSemantico {
 		
 		do
 		{
-			if ( !declaracoes.declara(no.valor, no.pai, escopoAtual) )
+			if ( !declaracoes.declara(no.valor, new Tipo ( Tipo.TIPO_ROTULO ), no.pai ) )
 				throw new Exception ( "Dupla declaracao do rotulo" + no.valor );
 			
 			no = no.irmao;
