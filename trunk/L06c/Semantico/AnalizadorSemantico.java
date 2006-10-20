@@ -114,27 +114,19 @@ public class AnalizadorSemantico {
 		
 	}
 
-	private void parte_const ( ) throws Exception
+	private void parte_const ( ArvorePrograma no ) throws Exception
 	{
-		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "parte_const" );
+		no = no.filho;
 		
-		validaToken ( "PA_CONST", 1 );
-		
-		leioToken();
-		eu.adicionaFilho( identificador() ); 
-		
-		while ( comparaToken ( "TO_ID", 0 ) )
+		do
 		{
-			//não chamo letoken antes pois dentro desta func vou usar o ID
-			eu.adicionaFilho( decl_cte ( ) );	
+			decl_cte ( no );
+			no = no.irmao;
+		}
 		
-			leioToken ( ); 
-			validaToken ( "OP_PTVG", 1 );
-
-			leioToken ( );
-		}	 
-
-		return eu;
+		while ( no.irmao != null );
+	
+	
 	}
 
 	private void decl_cte ( ) throws Exception
@@ -152,27 +144,18 @@ public class AnalizadorSemantico {
 		return eu;
 	}
 
-	private void parte_tipos ( ) throws Exception
+	private void parte_tipos ( ArvorePrograma no ) throws Exception
 	{
-		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "parte_tipos" );
-
-		validaToken ( "PA_TYPEDEF", 1 );
-		
-		leioToken ( );
-		eu.adicionaFilho( identificador() );
-		
-		while ( comparaToken ( "TO_ID", 0 ) )
+		no = no.filho;
+		do
 		{
-			//não chamo letoken antes pois dentro desta func vou usar o ID
-			eu.adicionaFilho ( definicao_tipos ( ) );	
-		
-			leioToken ( );
-			validaToken ( "OP_PTVG", 1 );
+			dedfinicao_tipo ( no );
+			no = no.irmao;
 			
-			leioToken ( );
-		}	 
+		}
+		
+		while ( no.irmao != null );
 
-		return eu;
 	}
 
 	private void definicao_tipos ( ) throws Exception
@@ -327,23 +310,16 @@ public class AnalizadorSemantico {
 		return eu;
 	}
 
-	private void parte_vars ( ) throws Exception
+	private void parte_vars ( ArvorePrograma no ) throws Exception
 	{
-		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "parte_vars" );
+		no = no.filho;
 		
-		validaToken ( "PA_VARS", 1 );
-		
-		leioToken ( );
 		do 
 		{		
-			eu.adicionaFilho ( decl_vars ( ) );
-			
-			leioToken ( );
-			validaToken ( "OP_PTVG", 1 );
-			
-			leioToken ( );
-
-		} while ( comparaToken ( "TO_ID", 0 ) );
+			dedcl_vars ( no );
+			no = no.irmao;
+		} 
+		while ( no.irmao != null );
 						
 		return eu;
 	}
@@ -363,25 +339,23 @@ public class AnalizadorSemantico {
 		return eu;
 	}
 
-	private void parte_rotinas ( ) throws Exception
+	private void parte_rotinas ( ArvorePrograma no ) throws Exception
 	{		
-		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "parte_rotinas" );
 		
-		while ( comparaToken ( "PA_PROC", 1 ) || comparaToken ( "PA_FUNC", 1 ) )
+		no = no.filho;
+		
+		do
 		{
-			if ( comparaToken ( "PA_PROC", 1 ) )
-			{
-				eu.adicionaFilho ( declaracao_procedimento ( ) );
-				leioToken ( );
-			}
-			else 
-			{
-				eu.adicionaFilho ( declaracao_funcao ( ) );
-				leioToken ( );
-			}
+			if ( no.valor.compareTo( "declaracao_procedimento" ) == 0 )
+				declaracao_proceddimento ( no );
+			else
+				declaracao_funcao ( no );
+			
+			no = no.irmao;
 		}
-
-		return eu;
+		while ( no.irmao != null );
+		
+		
 	}
 
 	private void declaracao_procedimento ( ) throws Exception
@@ -704,9 +678,8 @@ public class AnalizadorSemantico {
 	{		
 		no = no.filho;
 		
-		expressao ( no );
-		if ( no.tipo != "BOOLEANO" )
-			throw new Exception ("PA"); 
+		if ( expressao ( no ).compareTo ( "bool" ) != 0 )
+			throw new Exception ("Experado bool na condição do comando while"); 
 
 		leioToken ( );
 		validaToken ( "PA_DO", 1 );
@@ -734,23 +707,36 @@ public class AnalizadorSemantico {
 		return eu;
 	}
 
-	private void expressao ( ) throws Exception
-	{
-		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "expressao" );
+	private String expressao ( ArvorePrograma no ) throws Exception
+	{			
+		no = no.filho;
 		
-		eu.adicionaFilho ( expressao_simples ( ) );
-
-		leioToken ( );
-		if ( comparaToken ( "OP_IGUAL", 1 ) || comparaToken ( "OP_DIFERE", 1 ) || comparaToken ( "OP_MAIOR", 1 ) || 
-			 comparaToken ( "OP_MENOR", 1 ) || comparaToken ( "OP_MENORIG", 1 ) || comparaToken ( "OP_MAIORIG", 1 ) )
-		{
-			eu.adicionaFilho ( relacao ( ) );
-
-			leioToken ( );
-			eu.adicionaFilho ( expressao_simples ( ) );
-		}
+		//pego o tipo da primeira expressao
+		String tipoPrimeiraExpressao = expressao_simples ( no );
+		no = no.irmao; 
+				
+		//se não possui relacao
+		if ( no == null )
+			//retorno o tipo da primeira
+			return tipoPrimeiraExpressao;
 		
-		return eu;
+		//chamo a relacao
+		String relacao = relacao ( no );
+		
+		//verifico tipo da relacao e tipo da primeira expressao
+		if ( tipoPrimeiraExpressao.compareTo("bool") == 0 &&			
+			 relacao.compareTo("OP_IGUAL") != 0 && relacao.compareTo("OP_DIFERE") != 0 )			
+			throw new Exception ( "Relação invalida" );
+
+		//vou para proxima expressao
+		no = no.irmao;
+		String tipoSegundaExpressao = expressao_simples ( no );
+		
+		//verifico se são do msm tipo
+		if ( tipoPrimeiraExpressao.compareTo(tipoSegundaExpressao) != 0 )
+			throw new Exception ( "Relação invalida: Incompatibilidade de tipos" );
+		
+		return tipoPrimeiraExpressao;
 	}
 
 	private void relacao ( ) throws Exception
@@ -764,96 +750,117 @@ public class AnalizadorSemantico {
 		return null;
 	}
 
-	private void expressao_simples ( ) throws Exception
+	private String expressao_simples ( ArvorePrograma no ) throws Exception
 	{
-		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "expressao_simples" );
+		String tipo, tipoAnterior;
 		
-		if ( comparaToken ( "OP_MAIS", 1 ) || comparaToken ( "OP_MENOS", 1 ) )
-		{
-			leioToken ( );
-			eu.adicionaFilho ( termo ( ) );
-		}
-		else
-			eu.adicionaFilho ( termo ( ) );
+		no = no.filho;		
 		
-		leioToken ( );
-		
-		while ( comparaToken ( "OP_MAIS", 1 ) || comparaToken ( "OP_MENOS", 1 ) || comparaToken ( "PA_OR", 1 ) )
-		{
-			leioToken ( );
-			eu.adicionaFilho ( termo ( ) );
-			leioToken ( );
-		}
-		
-		return eu;
-	}
-
-	private void termo ( ) throws Exception
-	{
-		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "termo" );
-		
-		eu.adicionaFilho ( fator ( ) );
-
-		leioToken ( );
-		while ( comparaToken ( "OP_VEZES", 1 ) || comparaToken ( "OP_DIV", 1 ) || comparaToken ( "OP_RESTO", 1 ) || comparaToken ( "PA_AND", 1 ) )
-		{
-			leioToken ( );
-			eu.adicionaFilho ( fator ( ) );
-			leioToken ( );
-		}
-		
-		return eu;
-	}
-
-	private void fator ( ) throws Exception
-	{
-		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "fator" );
-		
-		if ( comparaToken ( "TO_ID", 0 ) )	
-			eu.adicionaFilho ( fator_identificador ( ) );
+		do
+		{			
+			//se tem operador
+			if ( no.nomeNo.compareTo("operador") == 0)
+			{
+				//pego tipo operador
+				if ( no.valor.compareTo("PA_OR") == 0)
+					tipo = "bool";
+				else
+					tipo = "integer";
+				
+				//verifico o tipo
+				if ( tipoAnterior != null && tipo.compareTo(tipoAnterior) != 0 )
+					throw new Exception ("Incompatibilidade de tipos.");
 			
-		else if ( comparaToken ( "TO_IN", 0 ) )
-			eu.adicionaFilho ( numero ( ) );
-
-		else if ( comparaToken ( "OP_ABR_PAR", 1 ) )
-		{
-			leioToken ( );
-			eu.adicionaFilho ( expressao ( ) );
-
-			leioToken ( );
-			validaToken ( "OP_FCH_PAR", 1 );
+				//passo o tipo para o anterior
+				tipoAnterior = tipo;			
+				
+				//vou para o termo
+				no = no.irmao;
+			}
+						
+			//pego o tipo do termo
+			tipo = termo ( no );
+			
+			
+			//verifico o tipo
+			if ( tipoAnterior != null && tipo.compareTo(tipoAnterior) != 0 )
+				throw new Exception ("Incompatibilidade de tipos.");
+			
+			//passo o tipo para o anterior
+			tipoAnterior = tipo;
+			
+			//caminha na arvore
+			no = no.irmao;
 		}
-
-		else if ( comparaToken ( "PA_NOT", 1 ) )
-		{
-			leioToken ( );
-			eu.adicionaFilho ( fator ( ) );
-		}
-		else
-			throw geraErro ( "TO_ID ou OP_ABR_PAR ou TO_IN ou PA_NOT", token[1] );
+		while ( no != null );
 		
-		return eu;
+		return tipo;
+	}
+
+	private String termo ( ArvorePrograma no ) throws Exception
+	{
+		no = no.filho;
+		String tipo, tipoAnterior;
+		
+		do
+		{							
+			//pego o tipo do fator
+			tipo = fator ( no );
+			
+			//verifico o tipo
+			if ( tipoAnterior != null && tipo.compareTo(tipoAnterior) != 0 )
+				throw new Exception ("Incompatibilidade de tipos.");
+			
+			tipoAnterior = tipo;
+			//caminha na arvore
+			no = no.irmao;
+			
+			//se tem operador
+			if ( no!= null)
+			{
+				//pego tipo operador
+				if ( no.valor.compareTo("PA_AND") == 0)
+					tipo = "bool";
+				else
+					tipo = "integer";
+				
+				//verifico o tipo
+				if ( tipo.compareTo(tipoAnterior) != 0 )
+					throw new Exception ("Incompatibilidade de tipos.");
+				
+				//vou para o termo
+				no = no.irmao;
+			}
+		}
+		while ( no != null );
+		
+	}
+
+	private String fator ( ArvorePrograma no ) throws Exception
+	{
+		no = no.filho;
+		
+		if ( no.nomeNo.compareTo( "fator_identificador" ) == 0 )
+			return fator_identificador ( no );
+	
+		if ( no.nomeNo.compareTo( "expressao" ) == 0 )
+			return expressao ( no );
+		
+		if ( no.nomeNo.compareTo( "numero" ) == 0 )
+			return "integer";
+		
+		String tipo = fator ( no );
+		
+		if ( tipo.compareTo( "bool" ) != 0 )
+			throw new Exception ( "Incompatibilidade de tipos." );
+		
+		return tipo;	
 	}
 	
-	private void fator_identificador ( ) throws Exception
+	private String fator_identificador ( ArvorePrograma no ) throws Exception
 	{
-		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "fator_identificador" );
-
-		eu.adicionaFilho( identificador() );
+		no = no.filho;
 		
-		leioToken ( );
-		if ( comparaToken ( "OP_ABR_COLC", 1 ) || comparaToken ( "OP_PTO", 1 ) )
-			eu.adicionaFilho ( variavel_parametros( ) );		
 		
-		else if ( comparaToken ( "OP_ABR_PAR", 1 ) )
-		{
-			leioToken ( );
-			eu.adicionaFilho ( lst_expressoes( ) ); 			
-			
-			leioToken ( );
-			validaToken ( "OP_FCH_PAR", 1 );
-		}
-		
-		return eu;
 	}
 }
