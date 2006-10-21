@@ -26,6 +26,16 @@ public class Declaracoes {
 		
 		escopoAtual--;
 		//tem q limpar as trankeiras
+	}
+
+	public String pegaTipoVariavel(String identificador) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public TipoFuncao pegaFuncao(String identificador) {
+		// TODO Auto-generated method stub
+		return null;
 	}	
 
 }

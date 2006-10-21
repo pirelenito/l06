@@ -124,7 +124,7 @@ public class AnalizadorSemantico {
 			no = no.irmao;
 		}
 		
-		while ( no.irmao != null );
+		while ( no != null );
 	
 	
 	}
@@ -154,7 +154,7 @@ public class AnalizadorSemantico {
 			
 		}
 		
-		while ( no.irmao != null );
+		while ( no != null );
 
 	}
 
@@ -319,7 +319,7 @@ public class AnalizadorSemantico {
 			dedcl_vars ( no );
 			no = no.irmao;
 		} 
-		while ( no.irmao != null );
+		while ( no != null );
 						
 		return eu;
 	}
@@ -353,7 +353,7 @@ public class AnalizadorSemantico {
 			
 			no = no.irmao;
 		}
-		while ( no.irmao != null );
+		while ( no != null );
 		
 		
 	}
@@ -752,7 +752,7 @@ public class AnalizadorSemantico {
 
 	private String expressao_simples ( ArvorePrograma no ) throws Exception
 	{
-		String tipo, tipoAnterior;
+		String tipo, tipoAnterior = null;
 		
 		no = no.filho;		
 		
@@ -800,7 +800,7 @@ public class AnalizadorSemantico {
 	private String termo ( ArvorePrograma no ) throws Exception
 	{
 		no = no.filho;
-		String tipo, tipoAnterior;
+		String tipo, tipoAnterior = null;
 		
 		do
 		{							
@@ -861,6 +861,52 @@ public class AnalizadorSemantico {
 	{
 		no = no.filho;
 		
+		//pego nome da chamada
+		String identificador = no.valor; 
 		
+		no = no.irmao;
+		
+		//é uma varivel
+		if ( no == null )			
+			return declaracoes.pegaTipoVariavel ( identificador );
+		
+		//é uma funcao
+		if ( no.nomeNo.compareTo("lst_expressoes") == 0 )			
+			return validaFuncao ( identificador, no );
+		
+		//é um array ou um record
+		return validaArrayRecord ( identificador, no );
+	}
+
+	private String validaArrayRecord(String identificador, ArvorePrograma no) {
+
+		Tipo t = new TipoRecord ();
+		
+		
+		return null;
+	}
+
+	private String validaFuncao(String identificador, ArvorePrograma no) throws Exception {
+		
+		int i = 0;
+		
+		TipoFuncao funcao = declaracoes.pegaFuncao ( identificador );
+		
+		if ( funcao == null )
+			throw new Exception ("Chamada a função não declarada" );
+		
+		//vou para o primeiro parametro
+		no = no.filho;
+
+		while ( no != null )
+		{
+			//verifico tipo do parametro
+			if ( funcao.pegaTipoParametro ( i++ ).compareTo ( expressao(no) ) != 0 )
+				throw new Exception ("Tipo de parametro incompativel em chamada de função");
+			
+			no = no.irmao;
+		}
+		
+		return funcao.pegaTipoRetorno ();
 	}
 }
