@@ -1,0 +1,150 @@
+
+programa ::=
+	PROG identificador bloco '.'
+
+bloco ::=
+	declaracoes Comando_composto
+
+declaracoes ::=
+	[parte_rotulos] [parte_const] [parte_tipos] [parte_vars] [parte_rotinas]
+
+parte_rotulos ::=
+	TARGET numero { ',' numero } ';'
+
+parte_const ::=
+	CONST decl_cte { ';' decl_cte } ';'
+
+decl_cte ::=
+	identificador IS expressão
+
+parte_tipos ::=
+	TYPEDEF definicao_tipo { ';' definicao_tipo } ';'
+
+definicao_tipo ::=
+	identificador '=' tipo
+
+tipo ::=
+	identificador
+	| tipo_array
+	| tipo_registro
+
+tipo_array ::=
+	ARRAY '(' tipo ')' '[' indice { ',' indice } ']'
+
+indice ::=
+	numero '..' numero
+
+tipo_registro ::=
+	RECORD lst_campos END RECORD
+
+lst_campos ::=
+	campo { ';' campo }
+
+
+campo ::=
+	lst_identificadores ':' tipo
+
+lst_identificadores ::=
+	identificador { ',' identificador }
+
+parte_vars ::=
+	VARS decl_vars { ';' decl_vars } ';'
+
+decl_vars ::=
+	lst_identificadores ':' tipo
+
+parte_rotinas ::=
+	{ declaracao_procedimento | declaracao_funcao }
+
+declaracao_procedimento ::=
+	PROC  identificador [ parametros_formais] IS bloco ';'
+
+declaracao_funcao ::=
+	FUNC '[' nome_tipo ']' identificador [parametros_formais] IS bloco ';'
+
+parametros_formais ::=
+	'(' par_formal { ';' par_formal } ')'
+
+par_formal ::=
+	lst_identificadores_par ':' nome_tipo
+
+lst_identificadores_par ::=
+	par { ',' par }
+
+par ::=
+	'!' identificador
+	| identificador
+
+comando_composto ::=
+	BEGIN { comando ';' } END
+
+comando ::=
+	[numero ':'] comando_sem_rotulo
+
+comando_sem_rotulo ::=
+	comando_sem_rotulo_identificador
+	| desvio
+	| comando_composto
+	| comando_condicional
+	| comando_for
+	| comando_while
+
+comando_sem_rotulo_identificador ::=
+	identificador 
+	( 
+		':=' expressão
+		| variavel_parametros ':=' expressão 
+		| [ '(' lst_expressoes ')' ]
+	)
+
+variavel ::=
+	identificador
+	| identificador variavel_parametros
+ 
+variavel_parametros ::=
+	'[' lst_expressoes ']'
+	| '.' identificador
+	|'[' lst_expressoes ']' variavel_parametros
+	| '.' identificador variavel_parametros
+
+fator ::=
+	fator_identificador
+	| numero  
+	| '(' expressao ')'
+	| NOT fator
+
+fator_identificador ::=
+	identificador 
+	(
+		variavel_parametros
+		| [ '(' lst_expressoes ')' ]
+	)
+desvio ::=
+	GOTO numero
+
+comando_condicional ::=
+	IF expressao THEN comando_sem_rotulo [ELSE comando_sem_rotulo] FI
+
+comando_for ::=
+	FORALL variavel IN expressao '..' expressao DO comando_sem_rotulo
+comando_while ::=
+	WHILE expressao DO comando_sem_rotulo
+
+lst_expressoes ::=
+	expressao { ',' expressao }
+
+expressao ::=
+	expressao_simples [ relacao expressao_simples ]
+relacao ::=
+	'=' | '<>' | '>' | '<' | '<=' | '>=' | '>'
+expressao_simples ::=
+	[ '+' | '-' ] termo { ('+' | '-' | OR) termo }
+
+termo ::=
+	fator { ('*' | '/' | '%' | AND) fator }
+
+numero ::=
+	INT
+identificador ::=
+	ID
+
