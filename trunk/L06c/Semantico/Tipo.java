@@ -16,14 +16,13 @@ public class Tipo {
 		return false;
 	}
 
-	public boolean adicionaParametro(Tipo tipoParametros, String valor, boolean referencia) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 	public boolean verificaIgualdade(String string) {
-		// TODO Auto-generated method stub
+		
+		if ( nome.compareTo( string ) == 0 )
+			return true;
+		
 		return false;
+		
 	} 
 		
 }

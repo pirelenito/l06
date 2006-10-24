@@ -18,5 +18,12 @@ public class TipoProcedimento extends Tipo {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+
+	public boolean adicionaParametro(Tipo tipoParametros, String valor, boolean referencia) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 
 }
