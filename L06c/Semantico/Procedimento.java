@@ -6,25 +6,25 @@ public class Procedimento extends Declaracao {
 
 	public Procedimento(String string) {
 		super (string);
+		
+		parametros = new Vector ( );
 	}
 	
-	public Procedimento() {
-		super("proc");
-	}
-
 	Vector parametros;
 	
-	public String pegaTipoParametro(int i) {
-		// TODO Auto-generated method stub
-		return null;
+	public Variavel pegaParametro(int i) {		
+		
+		return (Variavel)parametros.elementAt(i);
 	}
 	
 
-	public void adicionaParametro(Tipo tipoParametros, String valor, boolean referencia) throws Exception {
+	public void adicionaParametro( Variavel variavel ) throws Exception {
 		
-		throw new Exception ("Parametro com nome duplicado");
+		for ( int i=0; i< parametros.size();i++ )
+			if ( ( (Variavel)parametros.elementAt(i) ).identificador.compareTo(variavel.identificador) == 0 )
+				throw new Exception ("Parametro com nome duplicado");
 		
+		parametros.add( variavel );
 	}
-
-
+	
 }

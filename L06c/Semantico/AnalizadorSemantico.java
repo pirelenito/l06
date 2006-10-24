@@ -5,6 +5,11 @@ import Sintatico.ArvorePrograma;
 public class AnalizadorSemantico {
 	
 	private Declaracoes declaracoes;
+	
+	public AnalizadorSemantico()
+	{
+		declaracoes = new Declaracoes();
+	}
 			
 	public void validaArvore(ArvorePrograma arvorePrograma) throws Exception{		
 	
@@ -17,36 +22,14 @@ public class AnalizadorSemantico {
 		///declaracoes.declara ( no.valor, no.pai, escopoAtual, new Tipo ( Tipo.TIPO_PROGRAMA ) );
 
 		no = no.irmao;
+
+		declaracoes.sobeEscopo ( );
+		
 		bloco ( no );
 	}
 	
-	/*
-	private void identificador ( ) throws Exception
-	{
-		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "identificador" );
-		
-		validaToken ( "TO_ID", 0 );
-
-		eu.valor = token[1];
-		
-		return eu;
-	}
-
-	private void numero ( ) throws Exception
-	{
-		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "numero" );
-		
-		validaToken ( "TO_IN" , 0 );
-
-		eu.valor = token[1];
-		
-		return eu;
-	}*/
-
 	private void bloco ( ArvorePrograma no ) throws Exception
-	{	
-		declaracoes.sobeEscopo ( );
-		
+	{			
 		no = no.filho;
 		declaracoes ( no );	
 			
@@ -157,7 +140,7 @@ public class AnalizadorSemantico {
 	}
 
 	private void definicao_tipos ( ArvorePrograma no ) throws Exception
-	{		
+	{	
 		//pego o nome da delcaracao
 		no = no.filho;
 		String identificador = no.valor;
@@ -166,7 +149,7 @@ public class AnalizadorSemantico {
 		no = no.irmao;
 		Tipo tipo = tipo ( no );
 		
-		Tipo declaracao = new Tipo ( tipo, identificador );
+		Tipo declaracao = new TipoDefinido ( tipo, identificador );
 		
 		declaracoes.declara ( declaracao );
 	}
@@ -180,8 +163,8 @@ public class AnalizadorSemantico {
 		{
 			Tipo tipo = (Tipo)declaracoes.pegaDeclaracao( no.valor );
 			
-			if ( tipo.pegaComportamento().compareTo("Tipo") != 0 )
-				throw new Exception ("Esperado tipo!");
+			if ( !confirmaTipo(tipo) )
+				throw new Exception ("Esperado tipo. Encontrado " + tipo.pegaComportamento() );
 			
 			return tipo;
 		}
@@ -192,6 +175,13 @@ public class AnalizadorSemantico {
 		
 		//é um record!
 		return tipo_registro( no );
+	}
+
+	private boolean confirmaTipo(Tipo tipo) {
+		return tipo.pegaComportamento().compareTo("Tipo") == 0 ||
+				tipo.pegaComportamento().compareTo("TipoArray") == 0 ||
+				tipo.pegaComportamento().compareTo("TipoRecord") == 0 ||
+				tipo.pegaComportamento().compareTo("TipoDefinido") == 0;
 	}
 
 	private Tipo tipo_array (ArvorePrograma no ) throws Exception
@@ -238,11 +228,10 @@ public class AnalizadorSemantico {
 			ArvorePrograma identificador = no.filho.filho;
 			while ( identificador != null )
 			{
-				if ( !registro.adicionaPropriedade ( tipoPropriedades, identificador.valor ) )
-					throw new Exception ("Registro com propriedades com msm nome");
+				registro.adicionaPropriedade ( tipoPropriedades, identificador.valor );
 			
 				//proxima propriedade
-				no = no.irmao;
+				identificador = identificador.irmao;
 			}
 			
 			//vou para a proxima lista de propiedades
@@ -283,7 +272,7 @@ public class AnalizadorSemantico {
 			declaracoes.declara( variavel );
 		
 			//proxima variavel
-			no = no.irmao;
+			identificador = identificador.irmao;
 		}		
 	}
 
@@ -293,7 +282,7 @@ public class AnalizadorSemantico {
 		
 		do
 		{
-			if ( no.valor.compareTo( "declaracao_procedimento" ) == 0 )
+			if ( no.nomeNo.compareTo( "declaracao_procedimento" ) == 0 )
 				declaracao_procedimento ( no );
 			else
 				declaracao_funcao ( no );
@@ -312,11 +301,14 @@ public class AnalizadorSemantico {
 		
 		declaracoes.declara ( procedimento );
 		
+		declaracoes.sobeEscopo ( );
+		
 		//verifico se tem parametros 
 		no = no.irmao;
 		if ( no.nomeNo.compareTo("bloco") != 0)
 		{
 			preencheParametros(no, procedimento);
+			no = no.irmao;
 		}
 		
 		bloco ( no );		
@@ -328,9 +320,7 @@ public class AnalizadorSemantico {
 		//pego o tipo do retorno
 		no = no.filho;
 		Tipo tipoRetorno = (Tipo)declaracoes.pegaDeclaracao(no.valor);
-		if ( tipoRetorno.pegaComportamento().compareTo("Tipo") != 0 ||
-				tipoRetorno.pegaComportamento().compareTo("TipoArray") != 0 ||
-				tipoRetorno.pegaComportamento().compareTo("TipoRecord") != 0 )
+		if ( !confirmaTipo(tipoRetorno) )
 			throw new Exception ("Tipo não declarado");
 			
 		//vou para o nome da funcao
@@ -342,11 +332,14 @@ public class AnalizadorSemantico {
 		//declaro a vaca
 		declaracoes.declara ( funcao );
 		
+		declaracoes.sobeEscopo ( );
+		
 		//verifico se tem parametros 
 		no = no.irmao;
 		if ( no.nomeNo.compareTo("bloco") != 0)
 		{
 			preencheParametros(no, funcao);
+			no = no.irmao;
 		}
 		
 		bloco ( no );
@@ -359,32 +352,42 @@ public class AnalizadorSemantico {
 		while ( parFormal != null )
 		{
 			//pego o tipo dos parametros
-			Tipo tipoParametros = (Tipo)declaracoes.pegaDeclaracao(no.filho.irmao.valor);
-			if ( tipoParametros.pegaComportamento().compareTo("Tipo") != 0 ||
-					tipoParametros.pegaComportamento().compareTo("TipoArray") != 0 ||
-					tipoParametros.pegaComportamento().compareTo("TipoRecord") != 0 )
+			Tipo tipoParametros = (Tipo)declaracoes.pegaDeclaracao(parFormal.filho.irmao.valor);
+			if ( !confirmaTipo(tipoParametros) )
 				throw new Exception ("Tipo não declarado");
 			
-			//vou para os identificadores
-			ArvorePrograma identificador = parFormal.filho;
-			while ( identificador != null )
+			//vou para as listas de identificadores
+			ArvorePrograma listaIdentificador = parFormal.filho;
+			while ( listaIdentificador.irmao != null )
 			{
 				//vou para os pares
-				ArvorePrograma par = identificador.filho;
+				ArvorePrograma par = listaIdentificador.filho;
 				while ( par != null )
 				{
-					//cheguei aos identificadores
-					par = par.filho;
-					
-					//cheko se é por referencia
 					boolean referencia = false;
 					
+					//cheguei aos identificadores
+					ArvorePrograma arvoreTemp = par.filho;
+					
+					//cheko se é por referencia
+					if ( arvoreTemp.nomeNo.compareTo("operador") == 0 )
+					{
+						referencia = true;
+						par = par.irmao;
+					}
+										
+					//crio uma variavel
+					Variavel parametro = new Variavel ( arvoreTemp.valor, tipoParametros, false, referencia );
+					
 					//adiciono na lista de parametros
-					procedimento.adicionaParametro ( tipoParametros, par.valor, referencia );
+					procedimento.adicionaParametro ( parametro );
+					
+					//coloco no escopo
+					declaracoes.declara( parametro );
 											
 					par = par.irmao;
 				}
-				identificador = identificador.irmao;
+				listaIdentificador = listaIdentificador.irmao;
 			}
 			
 			parFormal = parFormal.irmao;
@@ -394,12 +397,12 @@ public class AnalizadorSemantico {
 	private void comando_composto ( ArvorePrograma no ) throws Exception
 	{
 		no = no.filho;
-		do
+		
+		while ( no != null )
 		{
 			comando ( no );
 			no = no.irmao;
 		}
-		while ( no.irmao != null );
 				
 	}
 	
@@ -420,9 +423,9 @@ public class AnalizadorSemantico {
 				throw new Exception ( "Nao foi declarado o rotulo" );
 			no = no.irmao;
 			*/
+			no = no.irmao;
 		}
 		
-		no = no.irmao;
 		comando_sem_rotulo( no );		
 	}
 
@@ -773,6 +776,9 @@ public class AnalizadorSemantico {
 	
 	private Tipo validaRecord(TipoRecord tipo, ArvorePrograma no) throws Exception {
 					
+		if ( tipo.pegaComportamento().compareTo("TipoRecord") != 0 )
+			throw new Exception ( "Esperado registro" );
+		
 		Tipo tipoPropriedade = tipo.pegaTipoPropriedade ( no.valor );
 		
 		if ( tipoPropriedade == null )
@@ -787,6 +793,9 @@ public class AnalizadorSemantico {
 
 	private Tipo validaArray(TipoArray tipo, ArvorePrograma no) throws Exception {
 
+		if ( tipo.pegaComportamento().compareTo("TipoArray") != 0 )
+			throw new Exception ( "Esperado array" );
+		
 		Tipo tipoExpressao;
 		int contadorDimensoes = 1;
 				
@@ -812,7 +821,7 @@ public class AnalizadorSemantico {
 		
 		//verifico por recursao
 		if ( no.pai.irmao != null )
-			return variavel_parametros(tipo.tipoPai, no.pai.irmao);
+			return variavel_parametros(tipo.tipoDados, no.pai.irmao);
 		
 		return tipo;
 	}
@@ -831,15 +840,22 @@ public class AnalizadorSemantico {
 	private void validaParametros(ArvorePrograma no, Procedimento procedimento) throws Exception {
 
 		int i = 0;
-		
+		Variavel parametro, variavel;
 		//vou para o primeiro parametro
 		no = no.filho;
-
+		
 		while ( no != null )
 		{
+			parametro = procedimento.pegaParametro(i++); 
+						
+			variavel = expressao (no);
+			
 			//verifico tipo do parametro
-			if ( procedimento.pegaTipoParametro ( i++ ).compareTo ( expressao(no) ) != 0 )
-				throw new Exception ("Tipo de parametro incompativel em chamada de função");
+			if ( parametro.referencia )
+				if (variavel.identificador.length() == 0 || variavel.constante )
+					throw new Exception ("Tipo de parametro incompativel. Parametro e uma refrencia.");
+			
+			parametro.atribui(variavel);
 			
 			no = no.irmao;
 		}

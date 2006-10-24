@@ -583,6 +583,8 @@ public class L06c
 		modoLexico ( );
 		
 		modoSintatico ( );
+		
+		modoSemantico();
 	}
 	
 	/**
@@ -602,10 +604,11 @@ public class L06c
 		//System.out.println ( "Modo Semantico ainda nao implementado!" );
 		
 		carregaLexico ( );
-		analizadorSemantico = new AnalizadorSemantico ( );
+		
 		ArvorePrograma arvorePrograma;
 		arvorePrograma = rodaSintatico ( );
 		
+		analizadorSemantico = new AnalizadorSemantico ( );
 		analizadorSemantico.validaArvore  ( arvorePrograma );
 		
 		

@@ -162,8 +162,10 @@ public class AnalizadorSintatico
 	{
 		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "operador" );
 		
-		if ( !( comparaToken ( "OP_MAIS", 1 ) || comparaToken ( "OP_MENOS", 1 ) || comparaToken ( "PA_OR", 1 ) ||
-			 comparaToken ( "OP_VEZES", 1 ) || comparaToken ( "OP_DIV", 1 ) || comparaToken ( "OP_RESTO", 1 ) || comparaToken ( "PA_AND", 1 ) ) )			
+		if ( !( comparaToken ( "OP_MAIS", 1 ) || comparaToken ( "OP_MENOS", 1 ) || 
+				comparaToken ( "PA_OR", 1 ) || comparaToken ( "OP_VEZES", 1 ) || 
+				comparaToken ( "OP_DIV", 1 ) || comparaToken ( "OP_RESTO", 1 ) || 
+				comparaToken ( "PA_AND", 1 ) || comparaToken ( "OP_EXCL", 1 ) ) )			
 			
 			geraErro( "operador", eu.valor );
 			
@@ -295,8 +297,7 @@ public class AnalizadorSintatico
 
 		validaToken ( "PA_TYPEDEF", 1 );
 		
-		leioToken ( );
-		eu.adicionaFilho( identificador() );
+		leioToken ( );		
 		
 		while ( comparaToken ( "TO_ID", 0 ) )
 		{
@@ -316,7 +317,7 @@ public class AnalizadorSintatico
 	{
 		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "definicao_tipos" );
 		
-		identificador();
+		eu.adicionaFilho( identificador() );
 				
 		leioToken ( );
 		validaToken ( "OP_IGUAL", 1 );
@@ -637,7 +638,10 @@ public class AnalizadorSintatico
 		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "par" );
 		
 		if ( comparaToken ( "OP_EXCL", 1 ) )
+		{
+			eu.adicionaFilho( operador ( ) );
 			leioToken ( );
+		}
 
 		eu.adicionaFilho ( identificador ( ) );
 		
@@ -718,7 +722,7 @@ public class AnalizadorSintatico
 	{
 		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "comando_sem_rotulo_identificador" );
 		
-		identificador();
+		eu.adicionaFilho( identificador() );
 		
 		leioToken ( );
 		if ( comparaToken ( "OP_ATRIB", 1 ) )
