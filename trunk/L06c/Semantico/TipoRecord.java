@@ -7,6 +7,11 @@ public class TipoRecord extends Tipo {
 	Vector propriedades;
 
 	public Tipo pegaTipoPropriedade(String valor) {
+		
+
+		if ( tipoPropriedade == null )
+			throw new Exception ("Propriedade invalida para o record");
+		
 		// TODO Auto-generated method stub
 		return null;
 	}

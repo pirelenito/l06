@@ -2,9 +2,9 @@ package Semantico;
 
 import java.util.Vector;
 
-public class TipoFuncao extends TipoProcedimento {
+public class Funcao extends Procedimento {
 	
-	public TipoFuncao(Tipo tipoRetorno) {
+	public Funcao(Tipo tipoRetorno, String string) {
 		super ("func");
 		
 		retorno = tipoRetorno;

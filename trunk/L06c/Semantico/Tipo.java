@@ -1,24 +1,45 @@
 package Semantico;
 
-public class Tipo {
+public class Tipo extends Declaracao{
 
-	public Tipo(String _nome) {
-		nome = _nome;
+	Tipo tipoPai;
+	
+	public Tipo ( Tipo pai, String string ) {
+		super ( string );
+		tipoPai = pai;
 	}
-
-	public String nome;
-
-	public boolean verificaIgualdade(Tipo tipo) {
+	
+	public static Tipo tipoInteiro ( )
+	{
+		return new Tipo ( "INTEGER", null );
+	}
+	
+	public static Tipo tipoBooleano ( )
+	{
+		return new Tipo ( "BOOL", null );
+	}
+	
+	public Tipo pegaTipoMore ( )
+	{
+		Tipo temp = this;
 		
-		if ( nome.compareTo( tipo.nome ) == 0)
-			return true;
+		while ( temp.tipoPai != null )
+			temp = temp.tipoPai;
+		
+		return temp;
+	}
+	
+	public boolean verificaIgualdade ( Tipo tipo ) {
+		
+		if ( pegaTipoMore().identificador.compareTo( tipo.pegaTipoMore().identificador ) == 0 )
+			return true;		
 		
 		return false;
 	}
 
-	public boolean verificaIgualdade(String string) {
+	public boolean verificaIgualdade ( String tipo ) {
 		
-		if ( nome.compareTo( string ) == 0 )
+		if ( pegaTipoMore().identificador.compareTo( tipo ) == 0 )
 			return true;
 		
 		return false;
