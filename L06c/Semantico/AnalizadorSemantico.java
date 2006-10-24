@@ -167,7 +167,7 @@ public class AnalizadorSemantico {
 		no = no.irmao;
 		Tipo tipo = tipo ( no );
 		
-		declaracoes.declara ( tipo, identificador );
+		declaracoes.declaraTipo ( tipo, identificador );
 	}
 
 	private Tipo tipo (ArvorePrograma no ) throws Exception
@@ -724,7 +724,7 @@ public class AnalizadorSemantico {
 		
 		//é uma varivel
 		if ( no == null )			
-			return declaracoes.pegaTipoVariavel ( identificador );
+			return declaracoes.pegaTipo ( identificador );
 		
 		//é uma funcao
 		if ( no.nomeNo.compareTo("lst_expressoes") == 0 )			
