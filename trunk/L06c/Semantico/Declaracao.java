@@ -10,7 +10,8 @@ public class Declaracao {
 
 	public String pegaComportamento ( )
 	{
-		return this.getClass().getName();
+		//Semantico.
+		return this.getClass().getSimpleName();
 	}
 	
 }

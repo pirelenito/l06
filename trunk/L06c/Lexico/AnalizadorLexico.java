@@ -393,7 +393,7 @@ public class AnalizadorLexico
 						{
 							retorno[0] = "TO_ID";
 							
-							retorno[1] = "'" + retorno[1] + "'";
+							retorno[1] = retorno[1];
 						}
 							
 							

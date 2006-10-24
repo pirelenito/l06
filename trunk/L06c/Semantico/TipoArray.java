@@ -2,19 +2,23 @@ package Semantico;
 
 public class TipoArray extends Tipo {
 
-	int tamanho;
+	int numeroDimensoes;
+	Tipo tipoDados;
 	
-	public TipoArray(Tipo tipo) {
-		// TODO Auto-generated constructor stub
+	public TipoArray(Tipo _tipoDados) {
+		super ( "Array");
+		
+		tipoDados = _tipoDados;
 	}
 
 	public int pegaNumeroDimensoes() {
-		// TODO Auto-generated method stub
-		return 0;
+		
+		return numeroDimensoes;
 	}
 
 	public void adicionaIndice(String inicioRange, String fimRange) {
-		// TODO Auto-generated method stub
+
+		numeroDimensoes++;
 		
 	}
 }
