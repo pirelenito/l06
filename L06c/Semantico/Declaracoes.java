@@ -26,82 +26,24 @@ public class Declaracoes {
 		
 		indiceEscopoAtual--;
 	}
-
 	
-	public Tipo pegaTipo(String identificador) {
+	public Declaracao pegaDeclaracao ( String identificador ) throws Exception {
+
+		Declaracao retorno = (Declaracao)escopoAtual.get(identificador); 
 		
-		return (Tipo)escopoAtual.get(identificador);
+		if ( retorno == null )
+			throw new Exception ("Chamada a função não declarada" );
+		
+		return retorno; 
 	}
 
-	public TipoFuncao pegaFuncao(String identificador) {
+	public void declara ( Declaracao declaracao ) throws Exception {
 		
-		TipoFuncao retorno = (TipoFuncao)escopoAtual.get(identificador); 
+		if ( escopoAtual.containsKey(declaracao.identificador ) )
+			throw new Exception ("Declarando com identificador duplicado" );
 		
-		if ( retorno.nome.compareTo("func") != 0 )
-			return null;
-		
-		return retorno;
-	}
-
-	public TipoArray pegaArray(String identificador) {
+		escopoAtual.put(declaracao.identificador, declaracao);
 	
-		TipoArray retorno = (TipoArray)escopoAtual.get(identificador); 
-		
-		if ( retorno.nome.compareTo("array") != 0 )
-			return null;
-		
-		return retorno;
 	}
-
-	public TipoRecord pegaRecord(String identificador) {
-
-		TipoRecord retorno = (TipoRecord)escopoAtual.get(identificador); 
-		
-		if ( retorno.nome.compareTo("registro") != 0 )
-			return null;
-		
-		return retorno;
-	}
-
-	public Tipo pegaDeclaracao(String identificador) {
-
-		return (Tipo)escopoAtual.get(identificador);
-	}
-
-	public boolean declaraRotulo(String valor) {
-						
-		return false;
-	}
-
-	public boolean declaraConstante(String identificador) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public boolean declara(Tipo tipo, String identificador) {
-		
-		if ( escopoAtual.containsKey(identificador ) )
-			return false;
-		
-		escopoAtual.put(identificador, tipo);
-		return true;
-		
-	}
-
-	public boolean declaraProcedimento(Tipo procedimento, String identificador) {
-		
-		return declara(procedimento, identificador);
-		
-	}
-
-	public boolean declaraFuncao(Tipo funcao, String identificador) {
-		
-		return declara(funcao, identificador);
-	}
-
-	public boolean declaraTipo(Tipo tipo, String identificador) {
-		
-		return declara(tipo, identificador);
-	}	
 
 }
