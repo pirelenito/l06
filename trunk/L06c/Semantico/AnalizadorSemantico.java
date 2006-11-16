@@ -500,6 +500,7 @@ public class AnalizadorSemantico {
 		Tipo tipoInterno = variavel_parametros(variavel.tipo, no);
 		
 		//pego a expressao de origem dos dados
+		no = no.irmao;
 		Variavel expressao = expressao(no);
 		
 		//crio uma variavel temporaria com o tipo interno para realizar a atribuicao
@@ -766,6 +767,12 @@ public class AnalizadorSemantico {
 		//vou para o filho
 		no = no.filho;		
 		
+		//verifico se é um tipo definido
+		if ( tipo.pegaComportamento().compareTo("TipoDefinido") == 0)
+		{
+			tipo = tipo.pegaTipoMore();			
+		}
+		
 		//é um array
 		if ( no.nomeNo.compareTo("lst_expressoes") == 0 )
 			return validaArray ( (TipoArray)tipo, no );
@@ -788,13 +795,16 @@ public class AnalizadorSemantico {
 		if ( no.irmao != null )
 			return variavel_parametros( tipoPropriedade, no);
 			
-		return tipo;
+		return tipoPropriedade;
 	}
 
 	private Tipo validaArray(TipoArray tipo, ArvorePrograma no) throws Exception {
 
 		if ( tipo.pegaComportamento().compareTo("TipoArray") != 0 )
 			throw new Exception ( "Esperado array" );
+		
+		//armazeno o pai, caso seja um array de arrays
+		ArvorePrograma maisParametros = no.irmao;
 		
 		Tipo tipoExpressao;
 		int contadorDimensoes = 1;
@@ -820,10 +830,10 @@ public class AnalizadorSemantico {
 		while ( no != null );
 		
 		//verifico por recursao
-		if ( no.pai.irmao != null )
+		if ( maisParametros != null )
 			return variavel_parametros(tipo.tipoDados, no.pai.irmao);
 		
-		return tipo;
+		return ( (TipoArray)tipo ).pegaTipoDados ( );
 	}
 
 	private Tipo validaFuncao(String identificador, ArvorePrograma no) throws Exception {

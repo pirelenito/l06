@@ -260,8 +260,7 @@ public class AnalizadorSintatico
 		validaToken ( "PA_CONST", 1 );
 		
 		leioToken();
-		eu.adicionaFilho( identificador() ); 
-		
+				
 		while ( comparaToken ( "TO_ID", 0 ) )
 		{
 			//não chamo letoken antes pois dentro desta func vou usar o ID
@@ -280,7 +279,7 @@ public class AnalizadorSintatico
 	{
 		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "decl_cte" );
 		
-		validaToken( "TO_ID", 0 );
+		eu.adicionaFilho( identificador() ); 
 		
 		leioToken ( );
 		validaToken ( "PA_IS", 1 );
