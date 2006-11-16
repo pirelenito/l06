@@ -123,7 +123,7 @@ public class L06c
 	 */
 	private static boolean verificaEstencao ( String arquivo )
 	{
-		if ( arquivo.substring( arquivo.length() - 4 ).toUpperCase().compareTo( ".L06" ) == 0 )
+		if ( arquivo.substring( arquivo.length() - 4 ).toUpperCase().compareTo( ".L66" ) == 0 )
 			return true;
 		
 		return false;

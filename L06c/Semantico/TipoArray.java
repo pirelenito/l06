@@ -21,4 +21,9 @@ public class TipoArray extends Tipo {
 		numeroDimensoes++;
 		
 	}
+
+	public Tipo pegaTipoDados() {
+		return tipoDados;
+	}
+	
 }

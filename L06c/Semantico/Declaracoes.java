@@ -33,6 +33,12 @@ public class Declaracoes {
 			tipo = new Tipo ("BOOL");		
 			declara( (Declaracao) tipo );
 			
+			Variavel var = new Variavel ("TRUE", new Tipo ("BOOL"), true, false );
+			declara( (Declaracao) var );
+			
+			var = new Variavel ("FALSE", new Tipo ("BOOL"), true, false );
+			declara( (Declaracao) var );
+			
 			Procedimento procedimento = new Procedimento ( "print" );
 			procedimento.adicionaParametro( new Variavel ( "parametro", Tipo.tipoInteiro(), false, false ) );			
 			declara ( (Declaracao)procedimento );
