@@ -1,6 +1,5 @@
 package Sintatico;
 
-import java.io.IOException;
 import Dados.Queue;
 
 /**
