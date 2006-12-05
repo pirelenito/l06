@@ -454,7 +454,7 @@ public class L06c
 	 */
 	private static void modoSobre ( )
 	{
-		System.out.println ( "\nCompilador L06    v0.5       2006 \n" +
+		System.out.println ( "\nCompilador L06    v0.8       2006 \n" +
 							 "Paulo Vitor       matricula: 200405600517\n" +
 							 "Tiago Kohagura    matricula: 200405600528\n" ); 
 	}
