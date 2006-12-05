@@ -7,6 +7,9 @@ import Sintatico.ArvorePrograma;
 
 public class GeradorDeCodigo {
 	
+	/**
+	 * Linhas de codigo mepa! lol
+	 */
 	ArrayList<String> codigo;
 	
 	/**
@@ -32,6 +35,8 @@ public class GeradorDeCodigo {
 		//inicio a lista de codigos
 		codigo = new ArrayList<String>();
 		variaveis = new TreeMap<String, Integer>();
+		constantes = new TreeMap<String, ArvorePrograma>();
+		tipos = new TreeMap<String, Integer>();
 		ultimoRotulo = 0;		
 		topoMemoria = -1;
 		
@@ -53,19 +58,27 @@ public class GeradorDeCodigo {
 	}
 
 	private void declaracoes (ArvorePrograma no)  
-	{		
-		//vou para o primeiro bloco
-		no = no.filho;
-		
-		if ( no.valor.compareTo("parte_const") == 0 )
+	{	
+		no = no.filho;		
+						
+		if ( no != null && no.nomeNo == "parte_const" )
+		{
 			parte_const ( no );
+			no = no.irmao;
+		}
 		
-		else if ( no.valor.compareTo("parte_tipos") == 0 )
+		if ( no != null && no.nomeNo == "parte_tipos" )
+		{
 			parte_tipos ( no );
+			no = no.irmao;
+		}
 		
-		else if ( no.valor.compareTo("parte_vars") == 0 )
+		if ( no != null && no.nomeNo == "parte_vars" )
+		{
 			parte_vars ( no );
-		
+			no = no.irmao;
+		}
+				
 	}
 
 	private void parte_vars(ArvorePrograma no) {
@@ -349,20 +362,26 @@ public class GeradorDeCodigo {
 
 	private void expressao_simples(ArvorePrograma no) 
 	{
-		ArvorePrograma preOperador = no.filho;
+		no = no.filho;
 		
-		//gero primeiro termo
-		no = no.filho.irmao;
-		termo ( no );
-		
-		//faço inversao
-		no = no.irmao;
-		if ( preOperador.valor.compareTo("OP_MENOS") == 0 )
-		{			
-			codigo.add ("INVR");
+		//verifico se tem pre-operador
+		ArvorePrograma preOperador = null;		
+		if ( no.nomeNo.compareTo("operador") == 0)
+		{
+			preOperador = no.filho;
 			no = no.irmao;
 		}
 		
+		//gero primeiro termo
+		termo ( no );
+		
+		//faço inversao
+		if ( preOperador != null && preOperador.valor.compareTo("OP_MENOS") == 0 )
+		{			
+			codigo.add ("INVR");
+		}
+
+		no = no.irmao;
 		while ( no != null )
 		{
 			//pego o operador

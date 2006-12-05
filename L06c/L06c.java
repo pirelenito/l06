@@ -1,6 +1,8 @@
 
 import java.io.*;
+import java.util.ArrayList;
 
+import Codigo.GeradorDeCodigo;
 import Lexico.AnalizadorLexico;
 import Semantico.AnalizadorSemantico;
 import Sintatico.*;
@@ -115,6 +117,8 @@ public class L06c
 	 */
 	private static AnalizadorSemantico analizadorSemantico;
 	
+	private static GeradorDeCodigo geradorDeCodigo;
+	
 	/**
 	 * Funcao helper para verifiar se uma string contem a extencao .l06
 	 * 
@@ -123,7 +127,7 @@ public class L06c
 	 */
 	private static boolean verificaEstencao ( String arquivo )
 	{
-		if ( arquivo.substring( arquivo.length() - 4 ).toUpperCase().compareTo( ".L66" ) == 0 )
+		if ( arquivo.substring( arquivo.length() - 4 ).toUpperCase().compareTo( ".L06" ) == 0 )
 			return true;
 		
 		return false;
@@ -584,9 +588,30 @@ public class L06c
 		
 		modoSintatico ( );
 		
-		modoSemantico();
+		//modoSemantico ( );
+		
+		modoGeraCodigo ( );
 	}
 	
+	private static void modoGeraCodigo() throws Exception {
+		carregaLexico ( );
+		
+		ArvorePrograma arvorePrograma;
+		arvorePrograma = rodaSintatico ( );
+		/*
+		analizadorSemantico = new AnalizadorSemantico ( );
+		analizadorSemantico.validaArvore  ( arvorePrograma );	
+		*/
+		FileWriter arquivoMepa = new FileWriter ( diretorioSaida + "mepa.mep" );
+		
+		geradorDeCodigo = new GeradorDeCodigo();
+		ArrayList<String> codigo = geradorDeCodigo.geraCodigo( arvorePrograma );
+		while ( codigo.size() != 0 )
+			arquivoMepa.write( codigo.remove(0) + "\n" );
+		
+		arquivoMepa.close();
+	}
+
 	/**
 	 * Modo de funcionamento onde somente e executado o analizador lexico!
 	 */
@@ -609,9 +634,7 @@ public class L06c
 		arvorePrograma = rodaSintatico ( );
 		
 		analizadorSemantico = new AnalizadorSemantico ( );
-		analizadorSemantico.validaArvore  ( arvorePrograma );
-		
-		
+		analizadorSemantico.validaArvore  ( arvorePrograma );		
 	}
 	
 	
