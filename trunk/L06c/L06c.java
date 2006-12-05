@@ -602,7 +602,8 @@ public class L06c
 		analizadorSemantico = new AnalizadorSemantico ( );
 		analizadorSemantico.validaArvore  ( arvorePrograma );	
 		*/
-		FileWriter arquivoMepa = new FileWriter ( diretorioSaida + "mepa.mep" );
+		String mepaFile = diretorioSaida + arquivoEntrada.substring(0, arquivoEntrada.length() - 3 ) + "mep";
+		FileWriter arquivoMepa = new FileWriter ( mepaFile );
 		
 		geradorDeCodigo = new GeradorDeCodigo();
 		ArrayList<String> codigo = geradorDeCodigo.geraCodigo( arvorePrograma );
