@@ -182,7 +182,7 @@ public class AnalizadorSintatico
 			    comparaToken ( "PA_VARS", 1 ) || comparaToken ( "PA_PROC", 1 ) || comparaToken ( "PA_FUNC", 1 ) )
 		{*/
 		
-		eu.adicionaFilho ( declaracoes ( ) );
+ 		eu.adicionaFilho ( declaracoes ( ) );
 		leioToken ( );		
 			
 		leioToken ( );
@@ -731,9 +731,13 @@ public class AnalizadorSintatico
 		}
 		else if ( comparaToken ( "OP_ABR_COLC", 1 ) || comparaToken ( "OP_PTO", 1 ) )
 		{
+			do{
+			
 			eu.adicionaFilho ( variavel_parametros( ) );
 			
 			leioToken ( );
+			}while ( comparaToken ( "OP_ABR_COLC", 1 ) || comparaToken ( "OP_PTO", 1 ) );
+			
 			validaToken ( "OP_ATRIB", 1 );
 			
 			leioToken ( );
