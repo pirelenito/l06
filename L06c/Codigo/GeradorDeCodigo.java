@@ -45,7 +45,10 @@ public class GeradorDeCodigo {
 		
 		declaracoes( no.filho.irmao.filho );
 		comando_composto ( no.filho.irmao.filho.irmao );		
-				
+		
+		//termino o programa
+		codigo.add("PARA");
+		
 		return codigo;
 	}	
 
@@ -229,7 +232,7 @@ public class GeradorDeCodigo {
 		
 		//rodo o comando
 		no = no.irmao;
-		comando_composto(no);
+		comando_sem_rotulo(no);
 		
 		codigo.add( "DSVS " + inicioWhile );
 		
@@ -248,9 +251,9 @@ public class GeradorDeCodigo {
 		atribuicao ( identificador );
 	}
 
-	private void atribuicao(ArvorePrograma identificador) {
+	private void atribuicao(ArvorePrograma variavel) {
 		
-		int endereco = variaveis.get(identificador.valor);
+		int endereco = variaveis.get(variavel.valor);
 				
 		codigo.add( "ARMZ " + endereco );
 	}
@@ -270,39 +273,39 @@ public class GeradorDeCodigo {
 		String rotulofimfor = novoRotulo();
 
 		expressao(no.filho.irmao);
-		atribuicao(no.filho);
+		atribuicao(no.filho.filho);
 
-		codigo.add(rotuloiniciofor+"NADA ");
+		codigo.add(rotuloiniciofor+" NADA ");
 		//segunda expressao
 		expressao(no.filho.irmao.irmao);
 		//primeira expressao
 		expressao(no.filho.irmao);
-		codigo.add("      CMAG ");
-		codigo.add("      DSVF "+rotulocorpofor);
+		codigo.add("CMAG ");
+		codigo.add("DSVF "+rotulocorpofor);
 		expressao(no.filho.irmao.irmao);
-		chamadaVariavel(no.filho);
-		codigo.add("      CMAG ");
-		codigo.add("      DSVF "+rotulofimfor);
+		chamadaVariavel(no.filho.filho);
+		codigo.add("CMAG ");
+		codigo.add("DSVF "+rotulofimfor);
 		//comandos dentro do for
 		comando_sem_rotulo(no.filho.irmao.irmao.irmao);
-		chamadaVariavel(no.filho);
-		codigo.add("      CRCT 1");
-		codigo.add("      SOMA");
-		atribuicao(no.filho);
-		codigo.add("      DSVS "+rotuloiniciofor);
-		codigo.add(rotulocorpofor+"NADA ");
+		chamadaVariavel(no.filho.filho);
+		codigo.add("CRCT 1");
+		codigo.add("SOMA");
+		atribuicao(no.filho.filho);
+		codigo.add("DSVS "+rotuloiniciofor);
+		codigo.add(rotulocorpofor+" NADA ");
 		expressao(no.filho.irmao.irmao);
-		chamadaVariavel(no.filho);
-		codigo.add("      CMEG ");
-		codigo.add("      DSVF "+rotulofimfor);
+		chamadaVariavel(no.filho.filho);
+		codigo.add("CMEG ");
+		codigo.add("DSVF "+rotulofimfor);
 		//comandos dentro do for
 		comando_sem_rotulo(no.filho.irmao.irmao.irmao);
-		chamadaVariavel(no.filho);
-		codigo.add("      CRCT 1");
-		codigo.add("      SUBT");
-		atribuicao(no.filho);
-		codigo.add("      DSVS " + rotuloiniciofor);
-		codigo.add(rotulofimfor+"NADA ");
+		chamadaVariavel(no.filho.filho);
+		codigo.add("CRCT 1");
+		codigo.add("SUBT");
+		atribuicao(no.filho.filho);
+		codigo.add("DSVS " + rotuloiniciofor);
+		codigo.add(rotulofimfor+" NADA ");
 
 	}
 
@@ -327,14 +330,14 @@ public class GeradorDeCodigo {
 		
 		//ELSE
 		no = no.irmao;
-		codigo.add( rotuloelse + "NADA");			
+		codigo.add( rotuloelse + " NADA");			
 		if ( no != null )
 		{
 			//se existe o else
 			comando_sem_rotulo( no );
 		}	
 		
-		codigo.add( rotulofim + "NADA");		
+		codigo.add( rotulofim + " NADA");		
 	}
 
 	private void expressao(ArvorePrograma no) 
@@ -393,10 +396,7 @@ public class GeradorDeCodigo {
 			
 			//aplico operacao (resultado no -1)
 			operacaoSomaSubOr ( operador );
-			
-			//desaloco o topo
-			codigo.add ("DESALOCA 1");
-			
+						
 			no = no.irmao;
 		}
 		
@@ -435,10 +435,7 @@ public class GeradorDeCodigo {
 			
 			//aplico operacao
 			operacaoMultiDivRestoAnd( operacao );
-			
-			//desaloco o topo
-			codigo.add ("DESALOCA 1");
-			
+						
 			no = no.irmao;
 		}
 		
@@ -507,6 +504,12 @@ public class GeradorDeCodigo {
 			//gero expressao
 			expressao ( noExpressao );
 		}
+		else if ( nomeVariavel.compareTo("TRUE") == 0 )
+			codigo.add ( "CRCT 1" );
+		
+		else if ( nomeVariavel.compareTo("FALSE") == 0 )
+			codigo.add ( "CRCT 0 " );
+		
 		else
 		{
 			//pego a area da memoria
