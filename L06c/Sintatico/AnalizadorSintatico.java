@@ -759,7 +759,7 @@ public class AnalizadorSintatico
 	{
 		ArvorePrograma eu = new ArvorePrograma ( numeroNo++, "variavel" );
 		
-		identificador();
+		eu.adicionaFilho( identificador() );
 		
 		leioToken ( );
 		if ( comparaToken ( "OP_ABR_COLC", 1 ) || comparaToken ( "OP_PTO", 1 ) )
